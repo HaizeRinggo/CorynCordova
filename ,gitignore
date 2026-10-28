@@ -1,0 +1,11 @@
+# Dependencias de Node
+node_modules/
+
+# Carpetas generadas por Cordova
+platforms/
+plugins/
+
+# Archivos de compilación y temporales
+/hooks/
+*.log
+.DS_Store
