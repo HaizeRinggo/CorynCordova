@@ -1,0 +1,64 @@
+<div class="container-fluid d-flex align-items-center justify-content-center py-5" style="min-height: 100vh;">
+    <div class="card shadow" style="width: 100%; max-width: 380px;">
+        <div class="card-body p-4 p-md-5">
+
+            <div class="text-center mb-4">
+                <span class="font-pixel fs-4 text-success-emphasis">CORYN</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-2 mb-4">
+                <h2 class="font-pixel fs-6 text-success-emphasis mb-0">INICIAR SESIÓN</h2>
+                <hr class="flex-grow-1 my-0 opacity-25">
+            </div>
+
+            <div class="alert alert-warning d-flex align-items-center" ng-if="error">
+                <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+            </div>
+
+            <!-- Formulario -->
+            <form ng-submit="login()" ng-if="!mostrarQR">
+                <div class="mb-3">
+                    <label class="form-label small text-secondary">Usuario</label>
+                    <input type="text" class="form-control" ng-model="datos.usuario" required autofocus>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small text-secondary">Contraseña</label>
+                    <input type="password" class="form-control" ng-model="datos.clave"
+                           placeholder="Déjalo vacío si vas a usar PIN">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small text-secondary">PIN</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                        <input type="password" class="form-control" inputmode="numeric" pattern="[0-9]*"
+                               ng-model="datos.pin" placeholder="••••" maxlength="4">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2" ng-disabled="cargando">
+                    <span ng-if="!cargando"><i class="bi bi-box-arrow-in-right me-2"></i>Entrar</span>
+                    <span ng-if="cargando"><span class="spinner-border spinner-border-sm me-2"></span>Verificando...</span>
+                </button>
+            </form>
+
+            <!-- QR -->
+            <div class="text-center" ng-if="mostrarQR">
+                <img ng-if="qrImagen" ng-src="{{ qrImagen }}" alt="Código QR" class="img-fluid" style="max-width: 220px;">
+                <div ng-if="!qrImagen" class="spinner-border text-primary" role="status"></div>
+                <p class="text-secondary small mt-3" ng-if="qrImagen">
+                    Escanea este código con tu celular (ya con sesión iniciada en Coryn).
+                </p>
+            </div>
+
+            <div class="text-center mt-3">
+                <button type="button" class="btn btn-link text-decoration-none" ng-click="toggleQR()">
+                    <i class="bi bi-qr-code me-1"></i>
+                    {{ mostrarQR ? 'Volver a usuario y contraseña' : 'Entrar con QR' }}
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

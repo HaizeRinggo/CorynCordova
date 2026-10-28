@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="org.coryn" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Coryn</name>
+    <description>
+        Aplicación Coryn.
+    </description>
+    <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
+        Haize
+    </author>
+
+    <content src="index.html" />
+
+    <access origin="*" />
+    <allow-navigation href="*" />
+
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+
+    <icon src="www/img/logo.png" />
+<plugin name="cordova-plugin-customurlscheme" spec="^5.0.2">
+    <variable name="URL_SCHEME" value="coryn" />
+</plugin>
+<plugin name="cordova-plugin-advanced-http" spec="^3.3.1" />
+<plugin name="cordova-plugin-file" spec="^8.1.3" />
+<plugin name="cordova-plugin-firebasex-core" spec="^2.0.0" />
+<plugin name="cordova-plugin-firebasex-messaging" spec="^2.0.1" />
+</widget>

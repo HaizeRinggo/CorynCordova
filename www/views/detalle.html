@@ -1,0 +1,127 @@
+<div class="container-fluid py-4 px-3 px-xxl-5">
+
+    <button class="btn btn-outline-secondary btn-sm mb-4" onclick="window.history.back()">
+        <i class="bi bi-arrow-left me-2"></i>Biblioteca
+    </button>
+
+    <!-- Spinner -->
+    <div class="text-center py-5" ng-if="cargando">
+        <div class="spinner-border text-primary" role="status"></div>
+    </div>
+
+    <!-- ══ HERO CON BACKDROP BLUR ══ -->
+    <div class="detalle-hero rounded-4 mb-4" ng-if="!cargando && anime">
+
+        <div class="detalle-hero-bg d-none d-md-block"
+            ng-style="{ 'background-image': 'url(' + portadaUrl(anime) + ')' }"></div>
+
+        <div class="detalle-hero-content p-0 p-md-4">
+            <div class="row g-4">
+
+                <!-- Portada: siempre primero -->
+                <div class="col-5 col-sm-4 col-md-3 col-xxl-2 order-1">
+                    <div class="detalle-portada-wrap">
+                        <img class="img-fluid w-100 rounded-3 shadow" ng-src="{{ portadaUrl(anime) }}"
+                            alt="{{ anime.titulo_carpeta }}">
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div class="col-7 col-sm-8 col-md-9 col-xxl-10 order-2 d-flex flex-column justify-content-end">
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="badge text-bg-secondary px-3 py-2">{{ anime.tipo }}</span>
+                        <span class="badge text-bg-primary px-3 py-2">{{ anime.episodios_total }} eps</span>
+                        <span class="badge text-bg-success px-3 py-2" ng-if="anime.estado_disco === 'Disponible'">
+                            <i class="bi bi-hdd-fill me-1"></i><span class="d-none d-sm-inline">Disco </span>conectado
+                        </span>
+                        <span class="badge text-bg-danger px-3 py-2" ng-if="anime.estado_disco === 'Offline'">
+                            <i class="bi bi-hdd me-1"></i><span class="d-none d-sm-inline">Disco </span>desconectado
+                        </span>
+                    </div>
+
+                    <div class="d-none d-sm-block mb-3">
+                        <p class="mb-1 small"><strong class="text-success-emphasis">Estudio:</strong> {{ anime.estudio
+                            }}</p>
+                        <p class="mb-0 small"><strong class="text-success-emphasis">Géneros:</strong> {{ anime.generos
+                            }}</p>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn" ng-class="anime.favorito ? 'btn-primary' : 'btn-outline-primary'"
+                            ng-click="toggleFavorito()">
+                            <i class="bi me-1" ng-class="anime.favorito ? 'bi-heart-fill' : 'bi-heart'"></i>
+                            <span class="d-none d-sm-inline">{{ anime.favorito ? 'Favorito' : 'Agregar' }}</span>
+                        </button>
+
+                        <select class="form-select form-select-sm w-auto" ng-model="anime.estado_usuario"
+                            ng-change="cambiarEstado()">
+                            <option value="" disabled>Seleccionar</option>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="Viendo">Viendo</option>
+                            <option value="Visto">Visto</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meta en móvil -->
+    <div class="mb-4 d-sm-none" ng-if="!cargando && anime">
+        <p class="mb-1 small"><strong class="text-success-emphasis">Estudio:</strong> {{ anime.estudio }}</p>
+        <p class="mb-0 small"><strong class="text-success-emphasis">Géneros:</strong> {{ anime.generos }}</p>
+    </div>
+
+    <!-- ══ SINOPSIS ══ -->
+    <div class="mb-4" ng-if="!cargando && anime">
+        <div class="d-flex align-items-center gap-2 mb-2">
+            <h2 class="font-pixel fs-6 text-success-emphasis mb-0">SINOPSIS</h2>
+            <hr class="flex-grow-1 my-0 opacity-25">
+        </div>
+        <p class="text-secondary lh-lg mb-0">{{ anime.sinopsis }}</p>
+    </div>
+
+    <!-- ══ REPRODUCTOR ══ -->
+    <div class="mb-4" ng-if="reproductorVisible" id="reproductor-destino">
+        <div class="card border-primary shadow" style="background:#000;">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="small"><i class="bi bi-tv-fill me-2 text-primary"></i>Reproduciendo</span>
+                <button class="btn btn-sm btn-outline-secondary" ng-click="cerrarReproductor()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <video controls autoplay class="w-100" style="max-height: 520px; display:block;" ng-src="{{ videoUrl }}">
+                Tu navegador no soporta reproducción de video.
+            </video>
+        </div>
+    </div>
+
+    <!-- ══ EPISODIOS ══ -->
+    <div ng-if="!cargando && anime">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <h2 class="font-pixel fs-6 text-success-emphasis mb-0">EPISODIOS</h2>
+            <hr class="flex-grow-1 my-0 opacity-25">
+            <span class="badge rounded-pill text-bg-secondary">{{ episodios.length }}</span>
+        </div>
+
+        <div class="alert alert-warning d-flex align-items-center" ng-if="episodios.length === 0">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            No se encontraron videos o el disco está desconectado.
+        </div>
+
+        <div class="list-group">
+            <a href="javascript:void(0)"
+                class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                ng-repeat="ep in episodios" ng-click="reproducir(ep)">
+                <span class="d-flex align-items-center gap-2 overflow-hidden">
+                    <i class="bi bi-play-circle text-primary flex-shrink-0"></i>
+                    <span class="text-truncate">{{ ep.nombre_archivo }}</span>
+                </span>
+                <span class="badge text-bg-secondary flex-shrink-0 ms-2 d-none d-sm-inline">{{ ep.formato | uppercase
+                    }}</span>
+            </a>
+        </div>
+    </div>
+
+</div>

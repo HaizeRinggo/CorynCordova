@@ -1,0 +1,247 @@
+<div class="container-fluid py-4 px-3 px-xxl-5">
+
+    <!-- ══ TABS ══ -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <button class="btn btn-sm chip-genero"
+            ng-class="tabActiva === 'escanear' ? 'btn-success' : 'btn-outline-secondary'"
+            ng-click="cambiarTab('escanear')">
+            <i class="bi bi-hdd-network-fill me-1"></i>Escanear Disco
+        </button>
+        <button class="btn btn-sm chip-genero"
+            ng-class="tabActiva === 'gestionar' ? 'btn-success' : 'btn-outline-secondary'"
+            ng-click="cambiarTab('gestionar')">
+            <i class="bi bi-pencil-square me-1"></i>Gestionar Biblioteca
+        </button>
+    </div>
+
+    <!-- ══════════ PESTAÑA: ESCANEAR ══════════ -->
+    <div ng-if="tabActiva === 'escanear'">
+
+        <div class="row mb-4 align-items-center">
+            <div class="col-12 col-md-7">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <h2 class="font-pixel fs-6 text-success-emphasis mb-0">ESCÁNER DE DISCO</h2>
+                    <hr class="flex-grow-1 my-0 opacity-25">
+                </div>
+                <p class="text-secondary small mb-0">Busca carpetas de anime en los discos conectados.</p>
+            </div>
+            <div class="col-12 col-md-5 d-flex justify-content-md-end mt-3 mt-md-0">
+                <button class="btn btn-primary px-4" ng-click="iniciarEscaneo()" ng-disabled="cargando">
+                    <span ng-if="!cargando"><i class="bi bi-search me-2"></i>Escanear ahora</span>
+                    <span ng-if="cargando"><span
+                            class="spinner-border spinner-border-sm me-2"></span>Escaneando...</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="alert alert-primary d-flex align-items-center mb-3" ng-if="mensaje">
+            <i class="bi bi-info-circle me-2"></i>{{ mensaje }}
+        </div>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 48px;">#</th>
+                            <th>Carpeta</th>
+                            <th class="d-none d-md-table-cell">Ruta</th>
+                            <th style="width: 160px;" class="text-center">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="carpeta in carpetasEncontradas">
+                            <td class="text-secondary">{{ $index + 1 }}</td>
+                            <td class="fw-semibold">{{ carpeta.titulo_busqueda }}</td>
+                            <td class="text-secondary small d-none d-md-table-cell">{{ carpeta.ruta_fisica }}</td>
+                            <td class="text-center">
+                                <button class="btn btn-primary btn-sm px-3" ng-click="sincronizarAnime(carpeta)"
+                                    ng-if="carpeta.estado !== 'Guardado'" ng-disabled="carpeta.sincronizando">
+                                    <span ng-if="!carpeta.sincronizando"><i
+                                            class="bi bi-cloud-download me-1"></i>Obtener info</span>
+                                    <span ng-if="carpeta.sincronizando"><span
+                                            class="spinner-border spinner-border-sm me-1"></span>Descargando...</span>
+                                </button>
+                                <span class="badge text-bg-success px-3 py-2" ng-if="carpeta.estado === 'Guardado'">
+                                    <i class="bi bi-check-circle me-1"></i>En biblioteca
+                                </span>
+                            </td>
+                        </tr>
+                        <tr ng-if="carpetasEncontradas.length === 0 && !cargando">
+                            <td colspan="4" class="text-center py-5 text-secondary">
+                                <i class="bi bi-hdd fs-2 d-block mb-2"></i>
+                                Presiona "Escanear ahora" para buscar carpetas.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════ PESTAÑA: GESTIONAR ══════════ -->
+    <div ng-if="tabActiva === 'gestionar'">
+
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <h2 class="font-pixel fs-6 text-success-emphasis mb-0">ANIMES REGISTRADOS</h2>
+            <hr class="flex-grow-1 my-0 opacity-25">
+            <span class="badge rounded-pill text-bg-secondary">{{ animesRegistrados.length }}</span>
+        </div>
+
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 64px;">Portada</th>
+                            <th>Título Oficial</th>
+                            <th class="d-none d-md-table-cell">Géneros</th>
+                            <th style="width: 140px;" class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="anime in animesRegistrados">
+                            <td>
+                                <img ng-src="{{ portadaUrl(anime) }}" alt="" class="rounded-2"
+                                    style="width:40px; height:56px; object-fit:cover;">
+                            </td>
+                            <td class="fw-semibold">{{ anime.titulo_oficial || anime.titulo_carpeta }}</td>
+                            <td class="text-secondary small d-none d-md-table-cell">{{ anime.generos || '—' }}</td>
+                            <td class="text-center">
+                                <button class="btn btn-warning btn-sm me-1" ng-click="abrirModalEditar(anime)"
+                                    title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" ng-click="eliminarAnime(anime)" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr ng-if="animesRegistrados.length === 0 && !cargandoRegistrados">
+                            <td colspan="4" class="text-center py-4 text-secondary">No hay animes registrados en la base
+                                de datos.</td>
+                        </tr>
+                        <tr ng-if="cargandoRegistrados">
+                            <td colspan="4" class="text-center py-4">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ══════════ MODAL: EDITAR ══════════ -->
+<div class="modal-backdrop-custom" ng-if="modalEditarVisible" ng-click="cerrarModalEditar()"></div>
+<div class="modal-custom" ng-if="modalEditarVisible" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-dark text-light border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title font-pixel fs-6 text-warning">Editar Anime</h5>
+                <button type="button" class="btn-close btn-close-white" ng-click="cerrarModalEditar()"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="text-center py-5" ng-if="cargandoEdicion">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+
+                <div class="row g-4" ng-if="!cargandoEdicion">
+                    <div class="col-12 col-sm-4">
+                        <label class="form-label text-secondary small">Portada</label>
+                        <img class="img-fluid rounded-3 shadow mb-2"
+                            ng-src="{{ nuevaPortadaPreview || portadaUrl(animeEdicion) }}" alt="">
+                        <input type="file" class="form-control form-control-sm" accept="image/*"
+                            onchange="angular.element(this).scope().seleccionarPortada(this)">
+
+                        <p class="text-secondary small mt-3 mb-0">
+                            <i class="bi bi-folder2 me-1"></i>Carpeta en disco:<br>
+                            <span class="text-truncate d-block">{{ animeEdicion.titulo_carpeta }}</span>
+                        </p>
+                    </div>
+
+                    <div class="col-12 col-sm-8">
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small">
+                                Título Oficial <span class="text-secondary">(este es el que se muestra en toda la
+                                    app)</span>
+                            </label>
+                            <input type="text" class="form-control bg-black text-light border-secondary"
+                                ng-model="animeEdicion.titulo_oficial">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small">Géneros</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-sm chip-genero" ng-repeat="g in generosDisponibles"
+                                    ng-class="generoEdicionActivo(g.id) ? 'btn-success' : 'btn-outline-secondary'"
+                                    ng-click="toggleGeneroEdicion(g.id)">
+                                    {{ g.nombre }}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small">Sinopsis</label>
+                            <textarea class="form-control bg-black text-light border-secondary" rows="6"
+                                ng-model="animeEdicion.sinopsis"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-secondary" ng-click="cerrarModalEditar()">Cancelar</button>
+                <button type="button" class="btn btn-warning" ng-click="guardarEdicion()"
+                    ng-disabled="guardandoEdicion || cargandoEdicion">
+                    <span ng-if="!guardandoEdicion"><i class="bi bi-check-lg me-1"></i>Guardar Cambios</span>
+                    <span ng-if="guardandoEdicion"><span
+                            class="spinner-border spinner-border-sm me-1"></span>Guardando...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ MODAL: ELIMINAR ══════════ -->
+<div class="modal-backdrop-custom" ng-if="modalEliminarVisible" ng-click="cerrarModalEliminar()"></div>
+<div class="modal-custom" ng-if="modalEliminarVisible" role="dialog">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark text-light border-danger">
+            <div class="modal-header border-danger">
+                <h5 class="modal-title font-pixel fs-6 text-danger">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close btn-close-white" ng-click="cerrarModalEliminar()"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar <strong>{{ animeEliminacion.titulo }}</strong> de la base de
+                    datos?</p>
+                <p class="text-secondary small mb-0">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Se eliminará el registro y su imagen de portada. La carpeta del anime en el disco
+                    <strong>no</strong> se verá afectada.
+                </p>
+
+                <div class="form-check form-switch mt-3">
+                    <input class="form-check-input" type="checkbox" role="switch" id="switchPush"
+                        ng-model="animeEliminacion.notificar">
+                    <label class="form-check-label text-secondary" for="switchPush">Enviar notificación push a los
+                        dispositivos</label>
+                </div>
+            </div>
+            <div class="modal-footer border-danger">
+                <button type="button" class="btn btn-outline-secondary"
+                    ng-click="cerrarModalEliminar()">Cancelar</button>
+                <button type="button" class="btn btn-danger" ng-click="confirmarEliminar()"
+                    ng-disabled="cargandoEliminar">
+                    <span ng-if="!cargandoEliminar"><i class="bi bi-trash me-1"></i>Eliminar Definitivamente</span>
+                    <span ng-if="cargandoEliminar"><span
+                            class="spinner-border spinner-border-sm me-1"></span>Procesando...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

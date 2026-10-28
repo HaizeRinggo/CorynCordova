@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "831926244884",
+    "project_id": "coryn-dee34",
+    "storage_bucket": "coryn-dee34.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:831926244884:android:e2792f8c8f6a4763c5b901",
+        "android_client_info": {
+          "package_name": "org.coryn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCOApgZdwtUkj_CWUwjvdX9Z4nzPH7aY28"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

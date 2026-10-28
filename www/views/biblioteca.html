@@ -1,0 +1,180 @@
+<div class="container-fluid py-4 px-3 px-xxl-5">
+
+    <!-- ══ CARRUSEL — RECIENTES ══ -->
+    <div class="mb-5" ng-if="animes.length > 0">
+        <div class="d-flex align-items-center gap-2 mb-3">
+            <h2 class="font-pixel fs-6 text-success-emphasis mb-0">RECIENTES</h2>
+            <hr class="flex-grow-1 my-0 opacity-25">
+            <span class="badge rounded-pill text-bg-secondary">{{ animes.length || 0 }} animes</span>
+        </div>
+
+        <div id="carruselRecientes" class="carousel slide carousel-coryn rounded-4 overflow-hidden"
+            data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#carruselRecientes" ng-repeat="anime in animes | limitTo: 10"
+                    data-bs-slide-to="{{ $index }}" ng-class="{ active: $index === 0 }">
+                </button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item" ng-repeat="anime in animes | limitTo: 10"
+                    ng-class="{ active: $index === 0 }">
+                    <img class="d-block w-100" ng-src="{{ portadaUrl(anime) }}"
+                        alt="{{ anime.titulo_oficial || anime.titulo_carpeta }}" ng-click="verDetalles(anime.id)"
+                        role="button">
+                    <div class="carousel-caption">
+                        <!-- Carrusel -->
+                        <p class="font-pixel fs-6 mb-2">{{ anime.titulo_oficial || anime.titulo_carpeta }}</p>
+                        <span class="badge text-bg-primary me-2">{{ anime.episodios_total }} eps</span>
+                        <span class="badge text-bg-secondary">{{ anime.tipo }}</span>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carruselRecientes"
+                data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carruselRecientes"
+                data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ══ BUSCADOR + FILTROS ══
+         Móvil: buscador arriba, chips abajo (order-1/2)
+         Laptop+: lado a lado (order-md-1/2) ══ -->
+    <div class="row g-3 mb-3">
+        <div class="col-12 col-md-5 col-xxl-4 order-1 order-md-1">
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control" placeholder="Buscar anime..." ng-model="busqueda"
+                    ng-change="onBusqueda()">
+                <button class="btn btn-outline-secondary" type="button" ng-if="busqueda" ng-click="limpiarFiltros()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-7 col-xxl-8 order-2 order-md-2">
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-sm chip-genero"
+                    ng-class="generoActivo === '' ? 'btn-success' : 'btn-outline-secondary'"
+                    ng-click="toggleGenero('')">Todos</button>
+                <button class="btn btn-sm chip-genero" ng-repeat="g in generosFiltro"
+                    ng-class="generoActivo === g ? 'btn-success' : 'btn-outline-secondary'"
+                    ng-click="toggleGenero(g)">{{ g }}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ HEADER BIBLIOTECA ══ -->
+    <div class="d-flex align-items-center gap-2 mb-3">
+        <h2 class="font-pixel fs-6 text-success-emphasis mb-0">BIBLIOTECA</h2>
+        <hr class="flex-grow-1 my-0 opacity-25">
+        <span class="badge rounded-pill text-bg-secondary" ng-if="!busqueda && !generoActivo">
+            Pág. {{ paginaActual }} / {{ totalPags }}
+        </span>
+        <span class="badge rounded-pill text-bg-primary d-flex align-items-center gap-2"
+            ng-if="busqueda || generoActivo">
+            {{ _filtrados.length }} resultados
+            <button class="btn btn-link btn-sm text-white text-decoration-none p-0" ng-click="limpiarFiltros()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </span>
+    </div>
+
+    <!-- ══ GESTIÓN DE PIN ══ -->
+    <div class="row mb-4">
+        <div class="col-12 col-md-6 col-xxl-4">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <h2 class="font-pixel fs-6 text-success-emphasis mb-0">ACCESO CON PIN</h2>
+                <hr class="flex-grow-1 my-0 opacity-25">
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <p class="text-secondary small mb-3" ng-if="!tienePin">Crea un PIN de 4 dígitos para iniciar sesión
+                        rápido.</p>
+                    <p class="text-secondary small mb-3" ng-if="tienePin">Ya tienes un PIN activo. Escribe uno nuevo
+                        para cambiarlo.</p>
+
+                    <form ng-submit="guardarPIN()">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                            <input type="{{ mostrarPin ? 'text' : 'password' }}" class="form-control"
+                                inputmode="numeric" pattern="[0-9]*" maxlength="4" ng-model="nuevoPin"
+                                placeholder="{{ tienePin ? '••••' : 'Ej. 1234' }}" required>
+                            <button class="btn btn-outline-secondary" type="button" ng-click="togglePin()">
+                                <i class="bi" ng-class="mostrarPin ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+                            </button>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                            {{ tienePin ? 'Actualizar PIN' : 'Crear PIN' }}
+                        </button>
+
+                        <button type="button" class="btn btn-link text-danger w-100 text-decoration-none"
+                            ng-if="tienePin" ng-click="quitarPin()">
+                            <i class="bi bi-trash me-1"></i>Quitar PIN
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ GRID — 2 col móvil / 4 col laptop / 6 col TV ══ -->
+    <div class="row row-cols-2 row-cols-md-4 row-cols-xxl-6 g-3">
+
+        <div class="col" ng-repeat="anime in animesEnPagina">
+            <div class="card h-100 anime-card" ng-click="verDetalles(anime.id)">
+                <div class="anime-card-img-wrap position-relative">
+                    <img ng-src="{{ portadaUrl(anime) }}" alt="{{ anime.titulo_oficial || anime.titulo_carpeta }}"
+                        loading="lazy">
+                    <div class="anime-card-play"><i class="bi bi-play-circle-fill"></i></div>
+                </div>
+                <div class="card-body py-2 px-2">
+                    <p class="anime-card-title small fw-semibold mb-1"
+                        title="{{ anime.titulo_oficial || anime.titulo_carpeta }}">
+                        {{ anime.titulo_oficial || anime.titulo_carpeta }}
+                    </p>
+                    <span class="text-primary-emphasis small">{{ anime.episodios_total }} eps</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sin resultados -->
+        <div class="col-12 text-center py-5" ng-if="animesEnPagina.length === 0 && !cargandoBD">
+            <i class="bi bi-search fs-1 d-block mb-3 text-secondary"></i>
+            <p class="text-secondary mb-3">No se encontraron animes con ese filtro.</p>
+            <button class="btn btn-primary px-4" ng-click="limpiarFiltros()">Ver todos</button>
+        </div>
+
+        <!-- Cargando -->
+        <div class="col-12 text-center py-5" ng-if="cargandoBD">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    </div>
+
+    <!-- ══ PAGINACIÓN ══ -->
+    <div class="d-flex justify-content-center mt-5" ng-if="totalPags > 1 && !busqueda && !generoActivo">
+        <nav aria-label="Paginación">
+            <ul class="pagination">
+                <li class="page-item" ng-class="{ disabled: paginaActual === 1 }">
+                    <a class="page-link" href="javascript:void(0)" ng-click="irAPagina(paginaActual - 1)">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                <li class="page-item" ng-repeat="p in numeroPaginas" ng-class="{ active: p === paginaActual }">
+                    <a class="page-link" href="javascript:void(0)" ng-click="irAPagina(p)">{{ p }}</a>
+                </li>
+                <li class="page-item" ng-class="{ disabled: paginaActual === totalPags }">
+                    <a class="page-link" href="javascript:void(0)" ng-click="irAPagina(paginaActual + 1)">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</div>
